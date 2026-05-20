@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ern.sap/events/sap.ern.stock.low.v1.json",
+  "title": "StockLow",
+  "description": "Emitted when a Product is flagged as low stock (criticality=2). Stock value is informational; the trigger may not have access to current stock (e.g. bulk action).",
+  "type": "object",
+  "required": [
+    "specversion",
+    "type",
+    "source",
+    "id",
+    "time",
+    "data"
+  ],
+  "properties": {
+    "specversion": {
+      "const": "1.0"
+    },
+    "type": {
+      "const": "sap.ern.stock.low.v1"
+    },
+    "source": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "datacontenttype": {
+      "const": "application/json"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "ID",
+        "criticality",
+        "trigger"
+      ],
+      "properties": {
+        "ID": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "stock": {
+          "type": "integer"
+        },
+        "criticality": {
+          "const": 2
+        },
+        "trigger": {
+          "type": "string",
+          "enum": [
+            "update",
+            "flagLowStock",
+            "auto-detect"
+          ]
+        }
+      }
+    },
+    "xmock": {
+      "type": "boolean",
+      "description": "True when emitted by mock event bus."
+    },
+    "xprovider": {
+      "type": "string",
+      "description": "Provider id (e.g. mock, eventmesh)."
+    }
+  }
+}

@@ -1,0 +1,37 @@
+# CAP project
+_out
+*.db
+*.sqlite
+connection.properties
+default-*.json
+.cdsrc-private.json
+gen/
+node_modules/
+target/
+
+# Web IDE, App Studio
+.che/
+.gen/
+
+# MTA
+*_mta_build_tmp
+*.mtar
+mta_archives/
+
+# Tests
+coverage/
+
+# Other
+.DS_Store
+*.orig
+*.log
+*.iml
+*.flattened-pom.xml
+
+# @cap-js/cds-typer
+@cds-models
+
+# Secrets / local config
+.env
+.env.local
+.mcp.json

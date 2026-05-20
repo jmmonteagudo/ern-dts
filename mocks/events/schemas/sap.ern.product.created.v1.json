@@ -1,0 +1,75 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ern.sap/events/sap.ern.product.created.v1.json",
+  "title": "ProductCreated",
+  "description": "Emitted after a Product is successfully created via OData CREATE.",
+  "type": "object",
+  "required": [
+    "specversion",
+    "type",
+    "source",
+    "id",
+    "time",
+    "data"
+  ],
+  "properties": {
+    "specversion": {
+      "const": "1.0"
+    },
+    "type": {
+      "const": "sap.ern.product.created.v1"
+    },
+    "source": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string",
+      "pattern": "^products/"
+    },
+    "id": {
+      "type": "string"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "datacontenttype": {
+      "const": "application/json"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "ID",
+        "name"
+      ],
+      "properties": {
+        "ID": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "category": {
+          "type": "string"
+        },
+        "price": {
+          "type": "number"
+        },
+        "stock": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "string"
+        }
+      }
+    },
+    "xmock": {
+      "type": "boolean",
+      "description": "True when emitted by mock event bus."
+    },
+    "xprovider": {
+      "type": "string",
+      "description": "Provider id (e.g. mock, eventmesh)."
+    }
+  }
+}

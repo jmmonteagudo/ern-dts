@@ -1,0 +1,13 @@
+<core:FragmentDefinition xmlns="sap.m" xmlns:core="sap.ui.core">
+    <Panel id="aiSuggestionsPanel" headerText="{i18n>ai.section.title}" expandable="true" expanded="true">
+        <content>
+            <MessageStrip
+                id="aiSuggestionsHint"
+                text="{i18n>ai.section.hint}"
+                type="Information"
+                showIcon="true"
+                class="sapUiSmallMargin" />
+            <Text id="aiSuggestionsPlaceholder" text="{i18n>ai.section.placeholder}" class="sapUiSmallMargin" />
+        </content>
+    </Panel>
+</core:FragmentDefinition>

@@ -1,0 +1,45 @@
+# Don't ship dev/test/mock assets to Cloud Foundry.
+# srv/ uses the adapter boundary (srv/adapters/*) so production code never
+# imports mocks/ directly. Setting *_MODE=disabled or =real (when implemented)
+# is the contract for production.
+
+# Mocks (event bus / AI / ATC / S4 stubs)
+mocks/
+
+# Test suites and helpers
+test/
+**/test/
+
+# Documentation
+docs/
+README.md
+*.md
+!app/products/webapp/manifest.json
+
+# CI / dev tooling
+.github/
+.eslintrc
+.eslintrc.*
+.gitignore
+.cfignore
+
+# ABAP sources (deployed via abapGit, not CF)
+abap/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# Local artifacts
+coverage/
+*.log
+.env
+.env.*
+events.log
+
+# MCP / Claude config (dev-only)
+.mcp.json
+.mcp.json.example
+CLAUDE.md
+.claude/

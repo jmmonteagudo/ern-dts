@@ -1,0 +1,69 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ern.sap/events/sap.ern.product.changed.v1.json",
+  "title": "ProductChanged",
+  "description": "Emitted after a Product is successfully updated via OData UPDATE.",
+  "type": "object",
+  "required": [
+    "specversion",
+    "type",
+    "source",
+    "id",
+    "time",
+    "data"
+  ],
+  "properties": {
+    "specversion": {
+      "const": "1.0"
+    },
+    "type": {
+      "const": "sap.ern.product.changed.v1"
+    },
+    "source": {
+      "type": "string"
+    },
+    "subject": {
+      "type": "string",
+      "pattern": "^products/"
+    },
+    "id": {
+      "type": "string"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "datacontenttype": {
+      "const": "application/json"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "ID",
+        "changedFields"
+      ],
+      "properties": {
+        "ID": {
+          "type": "string"
+        },
+        "changedFields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "newValues": {
+          "type": "object"
+        }
+      }
+    },
+    "xmock": {
+      "type": "boolean",
+      "description": "True when emitted by mock event bus."
+    },
+    "xprovider": {
+      "type": "string",
+      "description": "Provider id (e.g. mock, eventmesh)."
+    }
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "mcpServers": {
+    "cap": {
+      "command": "npx",
+      "args": ["-y", "@cap-js/mcp-server"]
+    },
+    "fiori": {
+      "command": "npx",
+      "args": ["-y", "@sap-ux/fiori-mcp-server"]
+    },
+    "ui5": {
+      "command": "npx",
+      "args": ["-y", "@ui5/mcp-server"]
+    },
+    "cap-as-mcp": {
+      "command": "npx",
+      "args": ["-y", "@gavdi/cap-mcp"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    },
+    "abap-adt": {
+      "command": "node",
+      "args": ["/Users/I589361/Library/CloudStorage/OneDrive-SAPSE/MCP-Servers/mcp-abap-abap-adt-api/dist/index.js"],
+      "env": {
+        "SAP_URL": "https://YOUR_SAP_HOST:44300",
+        "SAP_USER": "SAP_DEV",
+        "SAP_PASSWORD": "REPLACE_ME",
+        "SAP_CLIENT": "100",
+        "SAP_LANGUAGE": "EN",
+        "NODE_TLS_REJECT_UNAUTHORIZED": "0"
+      }
+    }
+  }
+}

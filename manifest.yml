@@ -1,0 +1,6 @@
+applications:
+  - name: ern-dts-srv
+    memory: 256M
+    buildpack: nodejs_buildpack
+    routes:
+      - route: ern-dts-srv.cfapps.eu10.hana.ondemand.com

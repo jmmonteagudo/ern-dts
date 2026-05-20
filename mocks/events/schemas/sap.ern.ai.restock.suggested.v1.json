@@ -1,0 +1,67 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ern.sap/events/sap.ern.ai.restock.suggested.v1.json",
+  "title": "AiRestockSuggested",
+  "description": "Emitted after the AI provider returns restock suggestions for a set of products. Carries summary metadata only — the full suggestion payload is the action's return value.",
+  "type": "object",
+  "required": [
+    "specversion",
+    "type",
+    "source",
+    "id",
+    "time",
+    "data"
+  ],
+  "properties": {
+    "specversion": {
+      "const": "1.0"
+    },
+    "type": {
+      "const": "sap.ern.ai.restock.suggested.v1"
+    },
+    "source": {
+      "type": "string"
+    },
+    "id": {
+      "type": "string"
+    },
+    "time": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "datacontenttype": {
+      "const": "application/json"
+    },
+    "data": {
+      "type": "object",
+      "required": [
+        "count",
+        "model",
+        "productIDs"
+      ],
+      "properties": {
+        "count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "model": {
+          "type": "string"
+        },
+        "productIDs": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "xmock": {
+      "type": "boolean",
+      "description": "True when emitted by mock event bus."
+    },
+    "xprovider": {
+      "type": "string",
+      "description": "Provider id (e.g. mock, eventmesh)."
+    }
+  }
+}
