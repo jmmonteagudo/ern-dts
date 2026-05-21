@@ -3,4 +3,4 @@ applications:
     memory: 256M
     buildpack: nodejs_buildpack
     routes:
-      - route: ern-dts-srv.cfapps.eu10.hana.ondemand.com
+      - route: ern-dts-srv.cfapps.us20.hana.ondemand.com
