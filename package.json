@@ -7,11 +7,11 @@
   "private": true,
   "dependencies": {
     "@cap-js/sqlite": "^1",
-    "@sap/cds": "^7",
+    "@sap/cds": "^8",
     "express": "^4"
   },
   "devDependencies": {
-    "@sap/cds-dk": "^7",
+    "@sap/cds-dk": "^8",
     "@wdio/cli": "^8",
     "@wdio/local-runner": "^8",
     "@wdio/mocha-framework": "^8",
