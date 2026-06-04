@@ -7,7 +7,9 @@
 # docs/DEPLOYMENT.md.
 #
 # Usage:  ./scripts/deploy.sh        # checks login, runs cf push, smokes
-#         ./scripts/deploy.sh --skip-tests
+#
+# Note: tests are currently disabled — they will be re-introduced via Joule
+# (see task #41). When tests come back, restore the pre-push test gate here.
 set -euo pipefail
 
 CF_API="https://api.cf.us20.hana.ondemand.com"
@@ -17,12 +19,6 @@ APP_NAME="ern-dts-srv"
 APP_HOST="ern-dts-srv.cfapps.us20.hana.ondemand.com"
 
 cd "$(dirname "$0")/.."
-
-if [[ "${1:-}" != "--skip-tests" ]]; then
-  echo ">> Running tests"
-  npm run test:coverage
-  npm run test:ui
-fi
 
 echo ">> Verifying CF login"
 if ! cf target 2>/dev/null | grep -q "$CF_ORG"; then

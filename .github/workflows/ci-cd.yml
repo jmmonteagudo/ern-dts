@@ -38,140 +38,146 @@ jobs:
         run: npm run lint -- --max-warnings 0
         continue-on-error: false
 
-  test-unit:
-    name: Unit & Integration Tests
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
+  # ----------------------------------------------------------------------------
+  # Test jobs DISABLED — tests will be re-introduced via Joule (BAS / Build Code).
+  # Re-enable each job below by un-commenting once Joule-generated tests are in.
+  # Until then, CI runs lint only; deploy depends on lint.
+  # ----------------------------------------------------------------------------
 
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+  # test-unit:
+  #   name: Unit & Integration Tests
+  #   runs-on: ubuntu-latest
+  #   needs: lint
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: 'npm'
+  #
+  #     - run: npm ci
+  #
+  #     - name: Run unit tests
+  #       run: npm run test:coverage
+  #
+  #     - name: Upload coverage
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: coverage-report
+  #         path: coverage/
 
-      - run: npm ci
+  # test-ui:
+  #   name: UI Tests (Fiori Elements extensibility)
+  #   runs-on: ubuntu-latest
+  #   needs: lint
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: 'npm'
+  #
+  #     - run: npm ci
+  #
+  #     - name: Run UI tests (formatter + manifest wiring)
+  #       run: npm run test:ui
+  #
+  #     - name: Verify Fiori app artifacts exist
+  #       run: |
+  #         test -f app/products/webapp/manifest.json
+  #         test -f app/products/webapp/ext/controller/ListReportExt.controller.js
+  #         test -f app/products/webapp/ext/controller/ObjectPageExt.controller.js
+  #         test -f app/products/webapp/ext/formatter/CriticalityFormatter.js
+  #         test -f app/products/webapp/ext/fragment/AiSuggestionsSection.fragment.xml
+  #         echo "All UI extensibility artifacts present."
 
-      - name: Run unit tests
-        run: npm run test:coverage
+  # test-e2e:
+  #   name: E2E Tests (wdi5)
+  #   runs-on: ubuntu-latest
+  #   needs: lint
+  #   continue-on-error: true
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: 'npm'
+  #
+  #     - run: npm ci
+  #
+  #     - name: Start CAP server
+  #       run: |
+  #         npx cds-serve &
+  #         npx wait-on http-get://localhost:4004/api/Products --timeout 30000
+  #
+  #     - name: Run E2E tests
+  #       run: npm run test:e2e
+  #
+  #     - name: Upload E2E screenshots
+  #       if: failure()
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: e2e-screenshots
+  #         path: test/e2e/screenshots/
 
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
+  # test-abap:
+  #   name: ABAP Quality (ATC)
+  #   runs-on: ubuntu-latest
+  #   needs: lint
+  #   continue-on-error: true
+  #   if: ${{ vars.ABAP_ENABLED == 'true' }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - name: Get OAuth token
+  #       id: token
+  #       run: |
+  #         TOKEN=$(curl -s -X POST "${{ secrets.ABAP_UAA_URL }}/oauth/token" \
+  #           -u "${{ secrets.ABAP_CLIENT_ID }}:${{ secrets.ABAP_CLIENT_SECRET }}" \
+  #           -d "grant_type=client_credentials" | jq -r '.access_token')
+  #         if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
+  #           echo "Failed to obtain OAuth token"
+  #           exit 1
+  #         fi
+  #         echo "::add-mask::$TOKEN"
+  #         echo "token=$TOKEN" >> $GITHUB_OUTPUT
+  #
+  #     - name: Run ATC against real ABAP system
+  #       env:
+  #         ABAP_HOST: ${{ secrets.ABAP_HOST }}
+  #         ABAP_TOKEN: ${{ steps.token.outputs.token }}
+  #       run: bash mocks/atc/run-atc-flow.sh
 
-  test-ui:
-    name: UI Tests (Fiori Elements extensibility)
-    runs-on: ubuntu-latest
-    needs: lint
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Run UI tests (formatter + manifest wiring)
-        run: npm run test:ui
-
-      - name: Verify Fiori app artifacts exist
-        run: |
-          test -f app/products/webapp/manifest.json
-          test -f app/products/webapp/ext/controller/ListReportExt.controller.js
-          test -f app/products/webapp/ext/controller/ObjectPageExt.controller.js
-          test -f app/products/webapp/ext/formatter/CriticalityFormatter.js
-          test -f app/products/webapp/ext/fragment/AiSuggestionsSection.fragment.xml
-          echo "All UI extensibility artifacts present."
-
-  test-e2e:
-    name: E2E Tests (wdi5)
-    runs-on: ubuntu-latest
-    needs: lint
-    continue-on-error: true
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Start CAP server
-        run: |
-          npx cds-serve &
-          npx wait-on http-get://localhost:4004/api/Products --timeout 30000
-
-      - name: Run E2E tests
-        run: npm run test:e2e
-
-      - name: Upload E2E screenshots
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: e2e-screenshots
-          path: test/e2e/screenshots/
-
-  test-abap:
-    name: ABAP Quality (ATC)
-    runs-on: ubuntu-latest
-    needs: lint
-    continue-on-error: true
-    if: ${{ vars.ABAP_ENABLED == 'true' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Get OAuth token
-        id: token
-        run: |
-          TOKEN=$(curl -s -X POST "${{ secrets.ABAP_UAA_URL }}/oauth/token" \
-            -u "${{ secrets.ABAP_CLIENT_ID }}:${{ secrets.ABAP_CLIENT_SECRET }}" \
-            -d "grant_type=client_credentials" | jq -r '.access_token')
-          if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-            echo "Failed to obtain OAuth token"
-            exit 1
-          fi
-          echo "::add-mask::$TOKEN"
-          echo "token=$TOKEN" >> $GITHUB_OUTPUT
-
-      - name: Run ATC against real ABAP system
-        env:
-          ABAP_HOST: ${{ secrets.ABAP_HOST }}
-          ABAP_TOKEN: ${{ steps.token.outputs.token }}
-        run: bash mocks/atc/run-atc-flow.sh
-
-  test-abap-mock:
-    name: ABAP Quality (mock ATC for trial)
-    runs-on: ubuntu-latest
-    needs: lint
-    if: ${{ vars.ATC_MOCK == 'true' }}
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-
-      - run: npm ci
-
-      - name: Start mock ATC server
-        run: |
-          MOCK_ATC_FIXTURE=${{ vars.ATC_MOCK_FIXTURE || 'run-success' }} \
-            node mocks/atc/server.js &
-          npx wait-on http-get://localhost:8765/health --timeout 10000
-
-      - name: Run ATC flow against mock
-        env:
-          ABAP_HOST: http://localhost:8765
-          ABAP_TOKEN: mock-token-anything
-          POLL_INTERVAL: '2'
-        run: bash mocks/atc/run-atc-flow.sh
+  # test-abap-mock:
+  #   name: ABAP Quality (mock ATC for trial)
+  #   runs-on: ubuntu-latest
+  #   needs: lint
+  #   if: ${{ vars.ATC_MOCK == 'true' }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: ${{ env.NODE_VERSION }}
+  #         cache: 'npm'
+  #
+  #     - run: npm ci
+  #
+  #     - name: Start mock ATC server
+  #       run: |
+  #         MOCK_ATC_FIXTURE=${{ vars.ATC_MOCK_FIXTURE || 'run-success' }} \
+  #           node mocks/atc/server.js &
+  #         npx wait-on http-get://localhost:8765/health --timeout 10000
+  #
+  #     - name: Run ATC flow against mock
+  #       env:
+  #         ABAP_HOST: http://localhost:8765
+  #         ABAP_TOKEN: mock-token-anything
+  #         POLL_INTERVAL: '2'
+  #       run: bash mocks/atc/run-atc-flow.sh
 
   # ----------------------------------------------------------------------------
   # Deploy job — gated by `vars.DEPLOY_ENABLED == 'true'`
@@ -188,7 +194,7 @@ jobs:
   deploy:
     name: Deploy to BTP
     runs-on: ubuntu-latest
-    needs: [test-unit, test-ui]
+    needs: [lint]
     if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.DEPLOY_ENABLED == 'true' }}
     steps:
       - uses: actions/checkout@v4
