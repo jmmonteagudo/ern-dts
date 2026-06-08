@@ -12,12 +12,14 @@
   },
   "devDependencies": {
     "@sap/cds-dk": "^8",
-    "eslint": "^8"
+    "eslint": "^8",
+    "puppeteer": "^22"
   },
   "scripts": {
     "start": "cds-serve",
     "watch": "cds watch",
-    "lint": "npx eslint ."
+    "lint": "npx eslint .",
+    "test:ui": "node scripts/run-qunit-tests.js"
   },
   "cds": {
     "requires": {

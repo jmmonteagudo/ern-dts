@@ -7,9 +7,6 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Only one CI/CD run per branch at a time. New pushes cancel in-flight runs
-# of the same branch — prevents Cloud Foundry "Only one build can be STAGING
-# at a time per application" collisions when commits land in quick succession.
 concurrency:
   group: ci-cd-${{ github.ref }}
   cancel-in-progress: true
@@ -38,164 +35,10 @@ jobs:
         run: npm run lint -- --max-warnings 0
         continue-on-error: false
 
-  # ----------------------------------------------------------------------------
-  # Test jobs DISABLED — tests will be re-introduced via Joule (BAS / Build Code).
-  # Re-enable each job below by un-commenting once Joule-generated tests are in.
-  # Until then, CI runs lint only; deploy depends on lint.
-  # ----------------------------------------------------------------------------
-
-  # test-unit:
-  #   name: Unit & Integration Tests
-  #   runs-on: ubuntu-latest
-  #   needs: lint
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
-  #         cache: 'npm'
-  #
-  #     - run: npm ci
-  #
-  #     - name: Run unit tests
-  #       run: npm run test:coverage
-  #
-  #     - name: Upload coverage
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: coverage-report
-  #         path: coverage/
-
-  # test-ui:
-  #   name: UI Tests (Fiori Elements extensibility)
-  #   runs-on: ubuntu-latest
-  #   needs: lint
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
-  #         cache: 'npm'
-  #
-  #     - run: npm ci
-  #
-  #     - name: Run UI tests (formatter + manifest wiring)
-  #       run: npm run test:ui
-  #
-  #     - name: Verify Fiori app artifacts exist
-  #       run: |
-  #         test -f app/products/webapp/manifest.json
-  #         test -f app/products/webapp/ext/controller/ListReportExt.controller.js
-  #         test -f app/products/webapp/ext/controller/ObjectPageExt.controller.js
-  #         test -f app/products/webapp/ext/formatter/CriticalityFormatter.js
-  #         test -f app/products/webapp/ext/fragment/AiSuggestionsSection.fragment.xml
-  #         echo "All UI extensibility artifacts present."
-
-  # test-e2e:
-  #   name: E2E Tests (wdi5)
-  #   runs-on: ubuntu-latest
-  #   needs: lint
-  #   continue-on-error: true
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
-  #         cache: 'npm'
-  #
-  #     - run: npm ci
-  #
-  #     - name: Start CAP server
-  #       run: |
-  #         npx cds-serve &
-  #         npx wait-on http-get://localhost:4004/api/Products --timeout 30000
-  #
-  #     - name: Run E2E tests
-  #       run: npm run test:e2e
-  #
-  #     - name: Upload E2E screenshots
-  #       if: failure()
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: e2e-screenshots
-  #         path: test/e2e/screenshots/
-
-  # test-abap:
-  #   name: ABAP Quality (ATC)
-  #   runs-on: ubuntu-latest
-  #   needs: lint
-  #   continue-on-error: true
-  #   if: ${{ vars.ABAP_ENABLED == 'true' }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - name: Get OAuth token
-  #       id: token
-  #       run: |
-  #         TOKEN=$(curl -s -X POST "${{ secrets.ABAP_UAA_URL }}/oauth/token" \
-  #           -u "${{ secrets.ABAP_CLIENT_ID }}:${{ secrets.ABAP_CLIENT_SECRET }}" \
-  #           -d "grant_type=client_credentials" | jq -r '.access_token')
-  #         if [ -z "$TOKEN" ] || [ "$TOKEN" = "null" ]; then
-  #           echo "Failed to obtain OAuth token"
-  #           exit 1
-  #         fi
-  #         echo "::add-mask::$TOKEN"
-  #         echo "token=$TOKEN" >> $GITHUB_OUTPUT
-  #
-  #     - name: Run ATC against real ABAP system
-  #       env:
-  #         ABAP_HOST: ${{ secrets.ABAP_HOST }}
-  #         ABAP_TOKEN: ${{ steps.token.outputs.token }}
-  #       run: bash mocks/atc/run-atc-flow.sh
-
-  # test-abap-mock:
-  #   name: ABAP Quality (mock ATC for trial)
-  #   runs-on: ubuntu-latest
-  #   needs: lint
-  #   if: ${{ vars.ATC_MOCK == 'true' }}
-  #   steps:
-  #     - uses: actions/checkout@v4
-  #
-  #     - uses: actions/setup-node@v4
-  #       with:
-  #         node-version: ${{ env.NODE_VERSION }}
-  #         cache: 'npm'
-  #
-  #     - run: npm ci
-  #
-  #     - name: Start mock ATC server
-  #       run: |
-  #         MOCK_ATC_FIXTURE=${{ vars.ATC_MOCK_FIXTURE || 'run-success' }} \
-  #           node mocks/atc/server.js &
-  #         npx wait-on http-get://localhost:8765/health --timeout 10000
-  #
-  #     - name: Run ATC flow against mock
-  #       env:
-  #         ABAP_HOST: http://localhost:8765
-  #         ABAP_TOKEN: mock-token-anything
-  #         POLL_INTERVAL: '2'
-  #       run: bash mocks/atc/run-atc-flow.sh
-
-  # ----------------------------------------------------------------------------
-  # Deploy job — gated by `vars.DEPLOY_ENABLED == 'true'`
-  #
-  # Disabled by default in CIS_DTS edition: the corporate SAP Identity Provider
-  # enforces SSO for all human users (I589361 et al), so password-based
-  # `cf auth` cannot be used from CI. To enable auto-deploy, IT must provision
-  # a service-user technical account exempt from SSO (or an IAS technical user
-  # with SpaceDeveloper role on cf-us20). Once available, set DEPLOY_ENABLED=true
-  # in repo Variables and configure the listed secrets.
-  #
-  # Until then, deploys are run manually via scripts/deploy.sh — see DEPLOYMENT.md.
-  # ----------------------------------------------------------------------------
-  deploy:
-    name: Deploy to BTP
+  test-unit:
+    name: Unit & Integration Tests
     runs-on: ubuntu-latest
-    needs: [lint]
-    if: ${{ github.ref == 'refs/heads/main' && github.event_name == 'push' && vars.DEPLOY_ENABLED == 'true' }}
+    needs: lint
     steps:
       - uses: actions/checkout@v4
 
@@ -206,27 +49,10 @@ jobs:
 
       - run: npm ci
 
-      - name: Install CF CLI
+      - name: Start CAP server
         run: |
-          wget -q -O cf-cli.deb "https://packages.cloudfoundry.org/stable?release=debian64&version=v8&source=github"
-          sudo dpkg -i cf-cli.deb
+          npx cds-serve &
+          npx wait-on http-get://localhost:4004/products/webapp/test/unit/unitTests.qunit.html --timeout 30000
 
-      - name: CF Login
-        run: |
-          cf api ${{ secrets.CF_API }}
-          cf auth "${{ secrets.CF_USER }}" "${{ secrets.CF_PASSWORD }}"
-          cf target -o ${{ secrets.CF_ORG }} -s ${{ secrets.CF_SPACE }}
-
-      - name: Deploy
-        run: cf push
-
-      - name: Smoke test
-        run: |
-          APP_URL=$(cf app ern-dts-srv | grep routes | awk '{print $2}')
-          echo "Testing https://$APP_URL"
-          curl -sf "https://$APP_URL/api/Products" > /dev/null
-          curl -sf "https://$APP_URL/products/webapp/index.html" > /dev/null
-          echo "Smoke tests passed"
-
-      - name: Verify deployment
-        run: cf apps
+      - name: Run QUnit tests
+        run: node scripts/run-qunit-tests.js
